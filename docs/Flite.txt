@@ -1,5 +1,4 @@
 ================================
-REDUCERON MEMO 9
 F-lite: a core subset of Haskell
 Matthew N, 26 November 2008
 ================================
@@ -148,20 +147,34 @@ Our F-lite implementation includes both an interpreter (written in
 Haskell) and a compiler (to C code - see Memo 22).  It works in both
 Hugs and GHC.  For example, in the source directory, using Hugs:
 
-  > runhugs Flite.hs ../examples/Fib.hs
+  > runhugs fl-pure.hs examples/Fib.hs
   fib(10) = 89
 
 and likewise using GHC:
 
-  > ghc -O2 --make Flite.hs -o Flite
+  > ghc -O2 --make fl-pure -o fl
 
-  > ./Flite ../examples/Fib.hs
+  > ./fl examples/Fib.hs
   fib(10) = 89
 
-To compile F-lite programs, use the '--compile' command-line option,
+A Cabal script can be used to install the parsec version using GHC:
+
+  > cabal install
+  
+  > flite examples/Fib.hs
+  fib(10) = 89
+
+or even the pure version:
+
+  > cabal install -f "pure"
+
+  > flite-pure examples/Fib.hs
+  fib(10) = 89
+
+To compile F-lite programs, use the '-c' command-line option,
 and redirect the output to a C file of your choice.
 
-  > ./Flite --compile ../examples/Fib.hs > /tmp/Fib.c
+  > flite -c ../examples/Fib.hs > /tmp/Fib.c
 
 The resulting C file can be compiled (with optimisations) using GCC:
 

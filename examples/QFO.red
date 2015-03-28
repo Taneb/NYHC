@@ -1,8 +1,0 @@
-("main",0,[],[FUN True 1 26,VAR False 0],[APP False [FUN True 2 23,INT 10,INT 10]])
-("toOne$",1,[2],[SPR "(==)" (Idx 0) (Lit 1),ARG True 0],[])
-("toOne$#1",1,[],[CON 2 0,ARG True 0,VAR False 0],[APP False [FUN True 1 1,SPR "(-)" (Idx 0) (Lit 1)]])
-("toOne$#2",1,[],[CON 2 0,INT 1,CON 0 1],[])
-("and$$",2,[5],[ARG False 0,ARG False 1],[])
-("and$$#1",1,[],[CON 0 0],[])
-("and$$#2",1,[],[ARG False 0],[])
-("safe$$$",3,[8],[ARG False 2,ARG False 0,ARG False 1],[])
