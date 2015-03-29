@@ -4,8 +4,6 @@
 --The version is an optimized version of TypeChecker.
 
 module Flite.TypeChecker2 where
---import Flite.Parsec.Parse
-import Flite.Parse
 import Flite.Syntax
 import Flite.Identify
 import Flite.Fresh
@@ -13,8 +11,7 @@ import Flite.Matching
 import Flite.Dependency
 import Flite.Traversals
 import Flite.Descend
-import qualified Flite.Parsec.Prelude as Prelude
-import Text.ParserCombinators.Parsec hiding (many, option, (<|>))
+import qualified Flite.Prelude as Prelude
 import Data.List
 import Data.Maybe
 
