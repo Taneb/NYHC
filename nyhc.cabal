@@ -33,3 +33,4 @@ executable nyhc
                      , array >= 0 && < 1
                      , containers >= 0 && < 1
                      , uniplate
+                     , haskell-src-exts
