@@ -1,0 +1,35 @@
+name:                NYHC
+version:             0.0.0.0
+synopsis:            The (New) York Haskell Compiler: eventual self-hosting Haskell98 compiler built on F-Lite.
+-- description:
+homepage:            https://github.com/barrucadu/NYHC
+license:             MIT
+license-file:        LICENSE
+author:              Michael Walker
+maintainer:          mike@barrucadu.co.uk
+-- copyright:
+category:            Compiler
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+source-repository head
+  type:     git
+  location: https://github.com/barrucadu/NYHC.git
+
+-- source-repository this
+--   type:     git
+--   location: https://github.com/barrucadu/NYHC.git
+--   tag:
+
+-- todo: build library as well
+
+executable nyhc
+  main-is:             nyhc.hs
+  build-depends:       base >=4.7 && <4.8
+  default-language:    Haskell98
+
+  build-depends:       base >= 3 && < 5
+                     , array >= 0 && < 1
+                     , containers >= 0 && < 1
+                     , uniplate

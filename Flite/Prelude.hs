@@ -1,4 +1,4 @@
-module Flite.Parsec.Prelude(
+module Flite.Prelude(
 		prelude,
 		supplyPrelude
 	) where

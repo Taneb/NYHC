@@ -6,8 +6,6 @@ import Flite.Syntax
 import Flite.Identify
 import Flite.Dependency
 import Flite.AnnSyntax
-import Flite.ParseLib
-import Flite.Parse
 import Flite.Pretty
 --import System
 import System.IO
