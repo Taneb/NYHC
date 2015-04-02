@@ -1,4 +1,8 @@
-module NYHC.Modules where
+module NYHC.Modules
+  ( ModulePath(..)
+  , recursiveParseFile
+  , recursiveParseModule
+  ) where
 
 import Control.Applicative ((<$>))
 import Control.Monad (filterM)
@@ -17,8 +21,13 @@ newtype ModulePath = ModulePath FilePath
 -- Haskell 98, no extensions on my default, LANGUAGE and LINE pragmas
 -- ignored, and no default fixities.
 recursiveParseFile :: FilePath -> [ModulePath] -> IO (Result (Module, [(ModuleName, Result Module)]))
-recursiveParseFile fp mps = parseFile fp >>= \res -> case res of
-  Ok mod -> (\ms -> Ok (mod, ms)) <$> recursiveParse mod mps
+recursiveParseFile = recursiveParseFile' []
+
+-- | Version of 'recursiveParseFile' which keeps track of modules
+-- already visited, to prevent loops.
+recursiveParseFile' :: [ModuleName] -> FilePath -> [ModulePath] -> IO (Result (Module, [(ModuleName, Result Module)]))
+recursiveParseFile' parsed fp mps = parseFile fp >>= \res -> case res of
+  Ok (mod@(Module _ m _ _ _ _ _)) -> (\ms -> Ok (mod, ms)) <$> recursiveParse (m:parsed) mod mps
 
   BadParse loc msg -> return $ BadParse loc msg
   Exception exc    -> return $ Exception exc
@@ -30,7 +39,12 @@ recursiveParseFile fp mps = parseFile fp >>= \res -> case res of
 -- Haskell 98, no extensions on my default, LANGUAGE and LINE pragmas
 -- ignored, and no default fixities.
 recursiveParseModule :: ModuleName -> [ModulePath] -> IO (Result (Module, [(ModuleName, Result Module)]))
-recursiveParseModule (ModuleName m) mps = moduleFile >>= flip recursiveParseFile mps where
+recursiveParseModule = recursiveParseModule' []
+
+-- | Version of 'recursiveParseModule' which keeps track of modules
+-- already visited, to prevent loops.
+recursiveParseModule' :: [ModuleName] -> ModuleName -> [ModulePath] -> IO (Result (Module, [(ModuleName, Result Module)]))
+recursiveParseModule' parsed (ModuleName m) mps = moduleFile >>= \fp -> recursiveParseFile' parsed fp mps where
   -- File corresponding to the module in the list of 'ModulePath's. If
   -- nothing could be found, this is just the module path relative to
   -- the current working directory.
@@ -49,16 +63,16 @@ recursiveParseModule (ModuleName m) mps = moduleFile >>= flip recursiveParseFile
 --
 -- Haskell 98, no extensions on my default, LANGUAGE and LINE pragmas
 -- ignored, and no default fixities.
-recursiveParse :: Module -> [ModulePath] -> IO [(ModuleName, Result Module)]
-recursiveParse (Module _ _ _ _ _ imports _) mps = go [] imports where
+recursiveParse :: [ModuleName] -> Module -> [ModulePath] -> IO [(ModuleName, Result Module)]
+recursiveParse parsed (Module _ _ _ _ _ imports _) mps = go [] imports where
   go done [] = return done
   go done (i:is)
     -- If the module has already been parsed, continue.
-    | modul `elem` parsed = go done is
+    | check modul = go done is
     -- Otherwise, parse it. This dispatch here allows cyclic module
     -- imports.
     | otherwise = do
-       res <- recursiveParseModule modul mps
+       res <- recursiveParseModule' (map fst done ++ parsed) modul mps
        case res of
          Ok (m, ms)       -> go (merge (modul, Ok m) ms)         is
          BadParse loc msg -> go ((modul, BadParse loc msg):done) is
@@ -68,8 +82,8 @@ recursiveParse (Module _ _ _ _ _ imports _) mps = go [] imports where
       -- The name of the module
       modul = importModule i
 
-      -- The names of modules already done
-      parsed = map fst done
+      -- Check if a module has already been visited
+      check name = name `elem` parsed || name `elem` map fst done
 
       -- Merge the parse result with the done list
-      merge m ms = m : (filter (\(name,_) -> name `notElem` parsed) ms ++ done)
+      merge m ms = m : (filter (\(name,_) -> not $ check name) ms ++ done)
