@@ -1,8 +1,14 @@
-module NYHC.Utils (decl, decl', findDef) where
+module NYHC.Utils (splitOn, decl, decl', findDef) where
 
 import Control.Applicative ((<$>), (<|>))
 import Data.Maybe (mapMaybe)
 import NYHC.Parse
+
+-- | Split a list on a given delimiter element.
+splitOn :: Eq a => a -> [a] -> [[a]]
+splitOn a as = case dropWhile (==a) as of
+  [] -> []
+  as' -> let (p, r) = break (==a) as' in p : splitOn a r
 
 -- | Look up a top-level declaration by name.
 --

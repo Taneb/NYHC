@@ -34,3 +34,5 @@ executable nyhc
                      , containers >= 0 && < 1
                      , uniplate
                      , haskell-src-exts
+                     , filepath
+                     , directory
