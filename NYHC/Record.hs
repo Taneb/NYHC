@@ -1,9 +1,8 @@
 module NYHC.Record where
 
 import Control.Exception (assert)
-import Control.Monad
-import Control.Monad.Trans.Writer
 import qualified Data.Map.Strict as M
+import Data.Traversable (for)
 import Language.Haskell.Exts.Syntax
 
 -- given a declaration of a data constructor, turns it into a plain one if it
@@ -19,15 +18,11 @@ reconstruct (QualConDecl sl bs cxt c) = QualConDecl sl bs cxt $ case c of
 -- * the declerations for data types containing records that have been removed
 -- * the altered list of declerations
 undefineRecords :: [Decl] -> ([Decl], [Decl])
-undefineRecords ds0 = runWriter $ forM ds0 $ \decl -> case decl of
-  DataDecl sl don con name ts qs ds ->
-    if any (\(QualConDecl _ _ _ c) -> case c of RecDecl _ _ -> True; _ -> False) qs
-    then do
-      tell [decl]
-      return $ DataDecl sl don con name ts (map reconstruct qs) ds
-    else
-      return decl
-  _ -> return decl
+undefineRecords ds0 = for ds0 $ \decl -> case decl of
+  DataDecl sl don con name ts qs ds |
+    any (\(QualConDecl _ _ _ c) -> case c of RecDecl _ _ -> True; _ -> False) qs ->
+      ([decl], DataDecl sl don con name ts (map reconstruct qs) ds)
+  _ -> ([],decl)
 
 -- utility function to reshuffle a list a bit
 -- I use it because sometimes multiple record fields share the same type decleration
